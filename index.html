@@ -1,0 +1,74 @@
+<html>
+<head>
+    <title>Crypto Dashboard</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <table class="tg" width="100%" height="100%">
+        <tr height="40px">
+            <th colspan="3">
+                <div class="menuButton">Settings</div>
+                <div class="lastUpdated">--</div>
+                <div class="refreshDisplayOuter">
+                    <div class="refreshDisplay"></div>
+                </div>
+                <select id="time" required>
+                    <option class="placeholder" selected disabled value="">Loading...</option>
+                    <option value="/pidashboard/index.html">Weather</option>
+                    <option value="/traffic/index.html">Traffic</option>
+                </select>
+                <div id="intervalContainer">
+                    <div class="interval" id="intervalTemplate" style="display:none;">--</div>
+                </div>
+            </th>
+        </tr>
+        <tr>
+            <th class="container" id="graphContainer" colspan="3">
+                <div class="graph" id="template" style="display:none">
+                    <div class="graphContent">
+                        <div class="graphWrapper">
+                            <canvas></canvas>
+                        </div>
+                        <div class="graphName">--</div>
+                        <div class="graphPrice">--</div>
+                        <div class="graphDelta"></div>
+                        <div class="graphArrow"></div>
+                        <div class="graphAlert"></div>
+                    </div>
+                </div>
+            </th>
+        
+        </tr>
+        <tr height="20px">
+            <th style="width:40%">
+                <div class="leftButton">&lt;</div>
+            </th>
+            <th class="pageDisplay">
+                1/1
+            </th>
+            <th style="width:40%">
+                <div class="rightButton">&gt;</div>
+            </th>
+        </tr>
+    </table>
+
+    <div class="menuPanel" style="display:none">
+        <div class="menuPanelContent">
+            ApiKey: <input type="text" name="apiKey" /><br /><br />
+            Intervals: <input type="text" name="intervals" /><br /><br />
+            Currencies: <input type="text" name="currencies" /><br /><br />
+            RefreshInterval: <input type="text" name="refreshInterval" /><br /><br />
+            GraphsPerPage: <input type="text" name="graphsPerPage" /><br /><br />
+            <button>Save</button>&nbsp;&nbsp;&nbsp;
+            <button>Cancel</button>&nbsp;&nbsp;&nbsp;
+            <button>Reset</button><br />
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+
+    <script src="index.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000000;
+    color: #DDDDDD;
+    margin: 0px;
+}
+
+table {
+    text-align: center;
+}
+
+a {
+    color: #DDDDDD;
+    text-decoration: none;
+}
+
+input {
+    width: 75%;
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    width: 16.6%;
+    font-size: 14px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #222222;
+    overflow: hidden;
+    word-break: normal;
+}
+
+.tg th {
+    font-size: 14px;
+    font-weight: normal;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #222222;
+    overflow: hidden;
+    word-break: normal;
+}
+
+.tg .tg-baqh {
+    text-align: center;
+    vertical-align: top;
+}
+
+.tg .tg-yw4l {
+    vertical-align: top;
+}
+
+
+#time {
+    font-size: 36px;
+}
+
+.graph
+{
+    float: left;
+    width: 25%;
+    padding: 0px;
+    margin: 0px;
+}
+#graphContainer
+{
+    vertical-align: top;
+}
+
+.interval
+{
+    float: left;
+    width: 30px;
+    height: 30px;
+    background-color: #333333;
+    color: #999999;
+    border-radius: 15px;
+    line-height: 30px;
+    margin-right: 10px;
+}
+
+.selectedInterval
+{
+    background-color: #999999;
+    color:black;
+}
+
+#intervalContainer
+{    
+	position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+.graphName
+{
+    float: left;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: 10px;
+    background-color: grey;
+    border-radius: 15px;
+    color: black;
+    font-weight: bold;
+}
+.graphPrice
+{
+    float: right;
+    background-color: green;
+    border-radius: 15px;
+    line-height: 20px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.graphDelta
+{
+    float: right;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 2px;
+}
+.graphArrow
+{
+    float: right;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 2px;
+}
+.graphAlert
+{
+    float: right;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 2px;
+}
+
+.graphContent
+{
+    font-size: 16px;
+    padding: 0px;
+    padding-bottom: 30px;
+    margin: 2px;
+  border: #555555;
+    border-style: solid;
+    border-width: thin;
+}
+
+.graphWrapper
+{
+    padding: 10px;
+}
+
+.refreshDisplay
+{
+  height: 100%;
+  width: 100%;
+  background-color: #999999;
+  /*position: absolute;
+  top: 100%;
+  transform: translateY(-100%);*/
+}
+
+.refreshDisplayOuter
+{
+  float: left;
+  position: relative;
+  height: 40px;
+  width: 5px;
+  border: #555555;
+    border-style: solid;
+    border-width: thin;
+}
+
+.menuButton
+{
+  float: left;
+  position: absolute;
+  padding: 3 10 3 10;
+  margin-left: 15px;
+    border-radius: 15px;
+    background-color: #666666;
+    top: 12px;
+}
+
+.menuButton2:after
+{
+  content: '\2807';
+  font-size: 30px;
+}
+
+.menuPanel
+{
+    border-radius: 15px;
+    background-color: #222222;
+    width: 50%;
+    left: 25%;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    padding: 30px;
+}
+
+.menuPanelContent
+{
+}
+
+.lastUpdated
+{
+  float: left;
+  left: 100px;
+  position: absolute;
+    top: 12px;
+}
+
+.leftButton
+{
+  float: left;
+  width: 100%;
+}
+
+.rightButton
+{
+  float: right;
+  width: 100%;
+}
+
+select {
+    background-color: #000000;
+    color: #DDDDDD;
+    border: 0px;
+    outline: 0px;
+}
+
+.placeholder {
+    display: none;
+}
