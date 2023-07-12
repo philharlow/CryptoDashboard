@@ -1,11 +1,8 @@
-
-
-var defaultIntervals = ["30m", "1h", "6h", "12h", "1d", "7d", "30d"];
-var defaultCurrencies = ["BTC", "ETH", "LTC"];//, "ADA", "NEO", "BCH", "XMR", "ARK", "IOT", "SC", "PIVX", "VTC", "BTG", "GRC", "XRP", "PAY", "HST", "WTC", "REQ", "VEN", "XLM"];
+var defaultIntervals = ["30m", "1h", "6h", "12h", "1d", "7d", "14d", "30d"];
+var defaultCurrencies = "bitcoin,ethereum,litecoin,cardano,cosmos,stellar".split(",");//, "ADA", "NEO", "BCH", "XMR", "ARK", "IOT", "SC", "PIVX", "VTC", "BTG", "GRC", "XRP", "PAY", "HST", "WTC", "REQ", "VEN", "XLM"];
 
 var intervals = defaultIntervals;
 var currencies = defaultCurrencies;
-var apiKey;
 
 var charts = [];
 var chartDivs = [];
@@ -51,10 +48,9 @@ function toggleMenu(button)
     {
         console.log("saving");
         window.localStorage.setItem("intervals", $("input[name=intervals]").val().replace(" ", "").toLowerCase());
-        window.localStorage.setItem("apiKey", $("input[name=apiKey]").val());
         var newCurrencies = $("input[name=currencies]").val().replace(" ", "");
         if (newCurrencies.toUpperCase() == "ALL")
-            newCurrencies = "BTC,ETH,LTC,ADA,NEO,BCH,XMR,ARK,IOT,SC,PIVX,VTC,BTG,GRC,XRP,PAY,HST,WTC,REQ,VEN,XLM";
+            newCurrencies = "bitcoin,ethereum,litecoin,cardano,cosmos";
         window.localStorage.setItem("currencies", newCurrencies.toUpperCase());
         window.localStorage.setItem("refreshInterval", $("input[name=refreshInterval]").val());
         window.localStorage.setItem("graphsPerPage", $("input[name=graphsPerPage]").val());
@@ -62,7 +58,6 @@ function toggleMenu(button)
     }
     else if ($(button).text() == "Reset")
     {
-        window.localStorage.setItem("apiKey", undefined);
         window.localStorage.setItem("intervals", undefined);
         window.localStorage.setItem("currencies", undefined);
         window.localStorage.setItem("refreshInterval", undefined);
@@ -81,7 +76,6 @@ function setMenuVisible(visible)
 
     if (menuVisible)
     {
-        $("input[name=apiKey]").val(apiKey);
         $("input[name=intervals]").val(intervals.join(","));
         $("input[name=currencies]").val(currencies.join(","));
         $("input[name=refreshInterval]").val(refreshInterval);
@@ -116,10 +110,9 @@ function init()
 
     if (window.localStorage)
     {
-        apiKey = getLocalValue("apiKey", "");
         intervals = getLocalValue("intervals", defaultIntervals.join(",")).split(",");
         currencies = getLocalValue("currencies", defaultCurrencies.join(",")).split(",");
-        refreshInterval = getLocalValue("refreshInterval", 60);
+        refreshInterval = getLocalValue("refreshInterval", refreshInterval);
         graphsPerPage = getLocalValue("graphsPerPage", 12);
     }
 
@@ -170,7 +163,7 @@ function init()
     {
         toggleMenu(this);
     });
-    $(".time").off('click').on("click", function ()
+    $("[0]").off('click').on("click", function ()
     {
         for (var i = 0; i < charts.length; i++)
         {
@@ -274,17 +267,21 @@ function updateGraph()
         
     var aggregate = Math.ceil(intervalSize);
     var limit = Math.min(currentIntervalMinutes / aggregate, samples);
-    var url = "https://min-api.cryptocompare.com/data/" + apiCall + "?fsym=" + currentCurrency + "&tsym=USD&limit=" + limit + "&aggregate=" + aggregate + "&api_key=" + apiKey;
+    const days = Math.max(1, currentIntervalMinutes / 60 / 24);
+    // console.log("currentIntervalMinutes: " + currentIntervalMinutes + " - intervalSize: " + intervalSize + " - aggregate: " + aggregate + " - limit: " + limit)
+    // console.log("days", days);
+    var url = `https://api.coingecko.com/api/v3/coins/${currentCurrency}/market_chart?vs_currency=usd&days=${days}`
 
 
     clearInterval(timeoutInterval);
     timeoutInterval = setInterval(timeoutHandler, 2000);
 
-    //console.log("Getting data for: " + currentCurrency);
+    // console.log("Getting data for: " + currentCurrency);
     currentJsonRequest = $.getJSON(url, function (data)
     {
         clearInterval(timeoutInterval);
-        if (data.Data.length == 0)
+        const prices = data.prices ?? [];
+        if (prices.length == 0)
         {
             var chartDiv = chartDivs[updating];
             chartDiv.find(".graphName").css("background-color", "red");
@@ -294,83 +291,90 @@ function updateGraph()
             return;
         }
 
-        //console.log("Got data for: " + currentCurrency;
+        limit = prices.length; // Fix timestamps
+
+        // console.log("Got data for: " + currentCurrency, data, limit);
         var labelArray = [];
         var dataArray = [];
-        var startingIndex = Math.max(0, data.Data.length - limit);
-        var startingSample = data.Data[startingIndex];
-        var endingSample = data.Data[data.Data.length - 1];
-        var startingValue = startingSample.close;
-        var startingTime = startingSample.time;
-        var endingValue = endingSample.close;
-        var endingTime = endingSample.time;
-        var startData = [];
-        var halfWindowSize = 0;
-        //console.log("startingValue is: " + startingValue);
-        for (var i = 0; i < limit; i++)
-        {
-            var sample = data.Data[startingIndex + i];
-            dataArray.push(sample.close);
-            labelArray.push(new Date(sample.time * 1000).toLocaleString());
-            startData.push(startingSample.close);
-            halfWindowSize = Math.max(halfWindowSize, Math.abs(sample.close - startingSample.close));
-        }
-        var newData = {
-            labels: labelArray,
-            datasets: [{
-                yAxisID: 'y-axis-0',
-                label: currentCurrency,
-                pointStrokeColor: "#58606d",
-                pointBorderWidth: 0,
-                data: dataArray,
-                fill: false,
-                fillBetweenSet: 1,
-                borderWidth: 1,
-                borderColor: "rgba(60,91,87,255)"
-            },
-                {
-                    yAxisID: 'y-axis-0',
-                    label: "",
-                    pointBorderWidth: 0,
-                    data: startData,
-                    startingValue: startingValue,
-                    fill: false
-                }]
-        };
+        var startingIndex = Math.max(0, prices.length - limit);
+        var startingSample = prices[startingIndex];
+        var endingSample = prices[prices.length - 1];
+		
+		if (startingSample && endingSample) {
+			var startingValue = startingSample[1];
+			var startingTime = startingSample[0];
+			var endingValue = endingSample[1];
+			var endingTime = endingSample[0];
+			var startData = [];
+			var halfWindowSize = 0;
+            // [0] = [0]
+            // .close = [1]
+			//console.log("startingValue is: " + startingValue);
+			for (var i = 0; i < limit; i++)
+			{
+				var sample = prices[startingIndex + i];
+				dataArray.push(sample[1]);
+				labelArray.push(new Date(sample[0]).toLocaleString());
+				startData.push(startingValue);
+				halfWindowSize = Math.max(halfWindowSize, Math.abs(sample[1] - startingValue));
+			}
+			var newData = {
+				labels: labelArray,
+				datasets: [{
+					yAxisID: 'y-axis-0',
+					label: currentCurrency,
+					pointStrokeColor: "#58606d",
+					pointBorderWidth: 0,
+					data: dataArray,
+					fill: false,
+					fillBetweenSet: 1,
+					borderWidth: 1,
+					borderColor: "rgba(60,91,87,255)"
+				},
+					{
+						yAxisID: 'y-axis-0',
+						label: "",
+						pointBorderWidth: 0,
+						data: startData,
+						startingValue: startingValue,
+						fill: false
+					}]
+			};
 
-        var startTimeStr = new Date(startingSample.time * 1000).toLocaleString();
-        var endTimeStr = new Date(endingSample.time * 1000).toLocaleString();
+			var startTimeStr = new Date(startingTime).toLocaleString();
+			var endTimeStr = new Date(endingTime).toLocaleString();
 
-        var differenceStr = getTimeStr(endingSample.time - startingSample.time);
+			var differenceStr = getTimeStr(endingTime - startingTime);
 
-        console.log("got data for graph: " + updating + " (" + (updating + (pageIndex * graphsPerPage)) + ")- start time: " + startTimeStr + " - end time: " + endTimeStr + " - " + differenceStr);
+			// console.log("got data for graph: " + updating + " (" + (updating + (pageIndex * graphsPerPage)) + ")- start time: " + startTimeStr + " - end time: " + endTimeStr + " - " + differenceStr);
 
 
-        var chartDiv = chartDivs[updating];
-        chartDiv.find(".graphPrice").text("$" + endingValue);
-        var delta = Math.round((endingValue - startingValue) / startingValue * 1000) / 10;
-        chartDiv.find(".graphDelta").text(Math.abs(delta) + "%");
-        var isUp = delta > 0;
-        chartDiv.find(".graphPrice").css("background-color", isUp ? greenColor : redColor);
-        chartDiv.find(".graphArrow").html(isUp ? "&#x25B2" : "&#x25BC");
-        chartDiv.find(".graphArrow").css("color", isUp ? greenColor : redColor);
-        //chartDiv.find(".graphAlert").text("");
-        chartDiv.find(".graphName").css("background-color", "grey");
+			var chartDiv = chartDivs[updating];
+			chartDiv.find(".graphPrice").text("$" + endingValue.toFixed(endingValue < 1 ? 6 : 2));
+			var delta = Math.round((endingValue - startingValue) / startingValue * 1000) / 10;
+			chartDiv.find(".graphDelta").text(Math.abs(delta) + "%");
+			var isUp = delta > 0;
+			chartDiv.find(".graphPrice").css("background-color", isUp ? greenColor : redColor);
+			chartDiv.find(".graphArrow").html(isUp ? "&#x25B2" : "&#x25BC");
+			chartDiv.find(".graphArrow").css("color", isUp ? greenColor : redColor);
+			//chartDiv.find(".graphAlert").text("");
+			chartDiv.find(".graphName").css("background-color", "grey");
 
-        //newData.datasets[0].label = currentCurrency;
-        var lineChart = charts[updating];
-        lineChart.tooltip._active = false;
-        lineChart.config.data = newData;
-        lineChart.config.options.animation.duration = lastDisplayedInterval == currentInterval ? 0 : 1000;
-        var ticks = lineChart.config.options.scales.yAxes[0].ticks;
-        ticks.min = startingValue - halfWindowSize;
-        ticks.max = startingValue + halfWindowSize;
-        ticks.stepSize = halfWindowSize / 2;
-        lineChart.update();
+			//newData.datasets[0].label = currentCurrency;
+			var lineChart = charts[updating];
+			lineChart.tooltip._active = false;
+			lineChart.config.data = newData;
+			lineChart.config.options.animation.duration = lastDisplayedInterval == currentInterval ? 0 : 1000;
+			var ticks = lineChart.config.options.scales.yAxes[0].ticks;
+			ticks.min = startingValue - halfWindowSize;
+			ticks.max = startingValue + halfWindowSize;
+			ticks.stepSize = halfWindowSize / 2;
+			lineChart.update();
 
-        lastUpdated = new Date();
+			lastUpdated = new Date();
+		}
 
-        updateNextGraph();
+		updateNextGraph();
     });
 }
 
